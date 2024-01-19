@@ -1,0 +1,68 @@
+﻿@page "/"
+@inject NavigationManager NavigationManager
+
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="card-title">Index Page</h3>
+                    <p class="card-text">Click the button to load the Dynamic Grid.</p>
+                    <button class="btn btn-primary" @onclick="LoadDynamicGrid">Load Dynamic Grid</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @foreach (var dynamicGridModel in dynamicGridModels)
+    {
+        <DynamicGrid Properties="@dynamicGridModel.PropertyNames" Items="@dynamicGridModel.Items" />
+    }
+</div>
+
+@code {
+    private List<DynamicGridModel> dynamicGridModels = new List<DynamicGridModel>();
+
+    private class DynamicGridModel
+    {
+        public List<string> PropertyNames { get; set; }
+        public List<object> Items { get; set; }
+        public string UniqueId { get; set; }
+    }
+
+    private void LoadDynamicGrid()
+
+    {
+
+        // Load new data
+        LoadEmployeeModel();
+    }
+
+    private void LoadEmployeeModel()
+    {
+        var propertyNames = typeof(Employee).GetProperties().Select(p => p.Name).ToList();
+        var items = new List<object>
+        {
+        new Employee { Id = "1", FirstName = "John", LastName = "Doe", PhoneNumber = "1234567890", UserMail = "john@example.com", Location = "New York" },
+        new Employee { Id = "2", FirstName = "Jane", LastName = "Doe", PhoneNumber = "9876543210", UserMail = "jane@example.com", Location = "California" },
+        new Employee { Id = "3", FirstName = "Aarav", LastName = "Patel", PhoneNumber = "8765432109", UserMail = "aarav@example.com", Location = "Mumbai" },
+        new Employee { Id = "4", FirstName = "Neha", LastName = "Sharma", PhoneNumber = "7654321098", UserMail = "neha@example.com", Location = "Delhi" },
+        new Employee { Id = "5", FirstName = "Rajat", LastName = "Singh", PhoneNumber = "6543210987", UserMail = "rajat@example.com", Location = "Jaipur" },
+        new Employee { Id = "6", FirstName = "Priya", LastName = "Gupta", PhoneNumber = "5432109876", UserMail = "priya@example.com", Location = "Kolkata" },
+        };
+
+        dynamicGridModels.Add(new DynamicGridModel { PropertyNames = propertyNames, Items = items });
+    }
+
+    private class Employee
+    {
+        public string Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string PhoneNumber { get; set; }
+        public string UserMail { get; set; }
+        public string Location { get; set; }
+    }
+}
+

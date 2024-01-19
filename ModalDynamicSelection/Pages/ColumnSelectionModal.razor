@@ -1,0 +1,38 @@
+﻿<Modal @ref="modal" title="Column Selection" IsVerticallyCentered="true">
+    <BodyTemplate>
+        <div class="col-auto">
+            <div class="form-check form-check-inline">
+                @foreach (var property in Properties)
+                {
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="checkbox" @bind="selectedColumns[property]" />
+                        <span style="margin-right:50px">@property</span>
+                    </label>
+                }
+            </div>
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
+        <Button Color="ButtonColor.Primary" @onclick="DisplayGridClick">Display Grid</Button>
+    </FooterTemplate>
+</Modal>
+
+@code {
+    [Parameter]
+    public Modal modal { get; set; }
+
+    [Parameter]
+    public List<string> Properties { get; set; }
+
+    [Parameter]
+    public Dictionary<string, bool> selectedColumns { get; set; }
+
+    [Parameter]
+    public EventCallback DisplayGridClick { get; set; }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+}

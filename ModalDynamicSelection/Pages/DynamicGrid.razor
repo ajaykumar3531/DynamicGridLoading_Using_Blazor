@@ -1,0 +1,129 @@
+﻿<div class="container mt-5">
+    <h3>Dynamic Grid</h3>
+
+    <div class="row justify-content-center mb-3">
+
+        <div class="col-md-6">
+            <div style="margin-top:30px">
+                <button class="btn btn-primary" @onclick="OnShowModalClick">Display PopUp</button>
+
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <label for="sortingOrder">Sort Order:</label>
+            <select class="form-select" @bind="selectedSortOrder">
+                <option value="Ascending">Ascending</option>
+                <option value="Descending">Descending</option>
+            </select>
+            <button class="btn btn-secondary" @onclick="SortGrid">Sort Grid</button>
+        </div>
+    </div>
+    <ColumnSelectionModal @ref="columnSelectionModal" Properties="Properties" selectedColumns="selectedColumns" DisplayGridClick="DisplayGrid" />
+
+
+    @if (gridDisplayed && selectedColumns.Any())
+    {
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    @foreach (var column in selectedColumnsCopy.Where(kvp => kvp.Value))
+                    {
+                        <th>@column.Key</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in sortedItems)
+                {
+                    <tr>
+                        @foreach (var column in selectedColumnsCopy.Where(kvp => kvp.Value))
+                        {
+                            <td>@GetColumnValue(item, column.Key)</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else if (selectedColumns.Any())
+    {
+        <p class="text-muted">Click "Display Grid" to show the selected columns.</p>
+    }
+    else
+    {
+        <p class="text-muted">No columns selected</p>
+    }
+
+
+</div>
+
+@code {
+    private Dictionary<string, bool> selectedColumns = new Dictionary<string, bool>();
+    private Dictionary<string, bool> selectedColumnsCopy = new Dictionary<string, bool>();
+    private bool gridDisplayed = false;
+    private List<object> sortedItems;
+
+    [Parameter]
+    public List<string> Properties { get; set; }
+
+    [Parameter]
+    public List<object> Items { get; set; }
+
+    private string selectedSortOrder = "Ascending";
+
+    private string GetColumnValue(object item, string column)
+    {
+        var property = item.GetType().GetProperty(column);
+        return property != null ? property.GetValue(item).ToString() : string.Empty;
+    }
+
+    private async void DisplayGrid()
+    {
+
+        selectedColumnsCopy = new Dictionary<string, bool>(selectedColumns);
+
+        gridDisplayed = true;
+
+        sortedItems = new List<object>(Items);
+
+        await columnSelectionModal.modal.HideAsync();
+    }
+
+    private void SortGrid()
+    {
+        if (sortedItems != null && sortedItems.Any())
+        {
+
+            var sortProperty = "Id";
+
+            if (selectedSortOrder == "Ascending")
+            {
+                sortedItems = sortedItems.OrderBy(item => GetColumnValue(item, sortProperty)).ToList();
+            }
+            else
+            {
+                sortedItems = sortedItems.OrderByDescending(item => GetColumnValue(item, sortProperty)).ToList();
+            }
+        }
+    }
+
+    private Modal modal = default!;
+    private ColumnSelectionModal columnSelectionModal;
+    private async Task OnShowModalClick()
+    {
+        await columnSelectionModal.modal.ShowAsync();
+    }
+
+
+    protected override void OnInitialized()
+    {
+
+        foreach (var property in Properties)
+        {
+            selectedColumns[property] = false;
+        }
+    }
+}
+
+
